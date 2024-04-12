@@ -2,6 +2,7 @@
 const { chromium } = require("playwright");
 const converter = require('json-2-csv');
 const fs = require("node:fs");
+const nodemailer = require("nodemailer");
 
 
 async function saveHackerNewsArticles() {
@@ -33,15 +34,15 @@ async function saveHackerNewsArticles() {
   } 
 
   // ^ As noted here (https://playwright.dev/docs/other-locators), it is recommended to use user-visible locators like text or accessible role instead of CSS classes. //
-  // However, given the structure of the HTML on the hacker news website, it was difficult to use getByRole as it mostly uses table data & rows and span elements of which are invalid arguments. //
-  // I experimented with arguments such as 'table' and 'row', however didn't have luck with these. I'd welcome refactoring this in the future should I be exposed to more efficient way however I'm happy with this implementation for now. //
+  // However, given the structure of the HTML on the hacker news website, it was difficult to use getByRole as it mostly uses table data & rows and span elements, which are invalid arguments. //
+  // I experimented with arguments such as 'table' and 'row', however didn't have luck with these. I'd welcome refactoring this in the future should I be exposed to a more efficient way however I'm happy with this implementation for now. //
 
   await browser.close();
-  console.log("Articles got! Compiling and downloading...")
+  console.log("Articles got! Converting and downloading...")
   // Convert articles array into csv //
   const articlesCsv = converter.json2csv(articlesArr)
 
-
+// Create csv file //
   function downloadArticleCsv() {
     fs.writeFile('articles.csv', articlesCsv, err => {
       if (err) {
@@ -54,6 +55,40 @@ async function saveHackerNewsArticles() {
 
   downloadArticleCsv();
 
+  // Send email with articles csv //
+// Define the HTML content of the email //
+  const html = `
+    <h2>Good Morning!</h2>
+    <p> See attached this mornings top 10 Hacker News Articles</p>
+  `
+// Function to send articles email to gmail account //
+  async function sendArticles() {
+// configure where the email is sent from (https://support.google.com/mail/answer/7104828?hl=en&ref_topic=7280141&sjid=5865078254559136309-EU) //
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'kormir.dev@gmail.com',
+        pass: 'itiv uijk sjsw stpo'
+      }
+    });
+// function to send email //
+    const info = await transporter.sendMail({
+      from: 'Kormir <kormir.dev@gmail.com',
+      to: 'kormir.dev@gmail.com',
+      subject: 'Hacker News Daily',
+      html: html,
+
+    })
+
+    console.log("Article Email sent!" + " " + info.messageId)
+
+
+  }  
+
+
+  sendArticles()
 
 }
 
