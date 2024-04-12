@@ -74,15 +74,19 @@ async function saveHackerNewsArticles() {
       }
     });
 // function to send email //
-    const info = await transporter.sendMail({
+    const message = await transporter.sendMail({
       from: 'Kormir <kormir.dev@gmail.com',
       to: 'kormir.dev@gmail.com',
       subject: 'Hacker News Daily',
       html: html,
+      attachments: [{
+        filename: 'articles.csv',
+        path: './articles.csv'
+      }]
 
     })
 
-    console.log("Article Email sent!" + " " + info.messageId)
+    console.log("Article Email sent! " + message.messageId)
 
 
   }  
