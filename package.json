@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node --env-file=.env index.js"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "json-2-csv": "^5.5.1",
     "playwright": "^1.39.0"
   },
   "devDependencies": {
