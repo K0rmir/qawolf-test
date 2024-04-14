@@ -3,6 +3,7 @@ const { chromium } = require("playwright");
 const converter = require('json-2-csv');
 const fs = require("node:fs");
 const nodemailer = require("nodemailer");
+const cron = require("node-cron");
 
 
 async function saveHackerNewsArticles() {
@@ -83,23 +84,25 @@ async function saveHackerNewsArticles() {
         filename: 'articles.csv',
         path: './articles.csv'
       }]
-
-    })
-
+    });
     console.log("Article Email sent! " + message.messageId)
-
-
-  }  
-
-
+  }
+  
   sendArticles()
 
 }
 
+// Automated scheduleing to recieve emails each day //
+
+cron.schedule('59 * * * * *', () => {
+  (async () => {
+    await saveHackerNewsArticles();
+  })();
+  console.log("10s CronJob Ran Successfully!")    
+});
 
 
 
 
-(async () => {
-  await saveHackerNewsArticles();
-})();
+
+
