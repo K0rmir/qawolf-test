@@ -5,6 +5,12 @@ const fs = require("node:fs");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
 
+async function installChromium() {
+  await chromium.install();
+  await saveHackerNewsArticles();
+}
+
+installChromium();
 
 async function saveHackerNewsArticles() {
   // launch browser
@@ -98,7 +104,7 @@ cron.schedule('*/16 * * * *', () => {
   (async () => {
     await saveHackerNewsArticles();
   })();
-  console.log("10s CronJob Ran Successfully!")    
+  console.log("CronJob Ran Successfully!")    
 });
 
 
