@@ -94,7 +94,7 @@ async function saveHackerNewsArticles() {
 
 // Automated scheduleing to recieve emails each day //
 
-cron.schedule('/16 * * * *', () => {
+cron.schedule('*/16 * * * *', () => {
   (async () => {
     await saveHackerNewsArticles();
   })();
