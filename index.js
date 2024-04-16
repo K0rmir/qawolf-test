@@ -127,6 +127,8 @@ async function saveHackerNewsArticles() {
 // });
 
 
+// Ideally, with the cron job included in the script, it would be hosted on a VPS for full automation. // 
+
 
 
 
