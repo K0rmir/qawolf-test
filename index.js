@@ -1,3 +1,5 @@
+// @ts-check
+
 // EDIT THIS FILE TO COMPLETE ASSIGNMENT QUESTION 1
 const { chromium } = require("playwright");
 const converter = require('json-2-csv');
@@ -19,9 +21,11 @@ async function saveHackerNewsArticles() {
   console.log("Navigating to page...")
   try {
     await page.goto("https://news.ycombinator.com", {timeout: 2 * 60 * 1000});
-  } catch(e) {
-    console.error(e)
-    throw new Error("Failed to establish connection.")
+  } catch(error) {
+    if (error.name === 'TimeoutError' || error.message.includes('NetworkError')) {
+      console.error("Failed to establish connection to Hacker News. (Network Error)");
+      throw new Error ("Failed to establish connection. Aborting...")
+    }
   }
  
   console.log("Connected to Hacker News! Getting top 10 articles...")
@@ -51,19 +55,23 @@ async function saveHackerNewsArticles() {
 
   await browser.close();
 
-    // Convert articles array into csv //
-  console.log("Articles got! Converting and downloading...")
+  // Convert articles array into csv //
+  console.log("Articles got! Converting to CSV and writing to file...")
   const articlesCsv = converter.json2csv(articlesArr)
 
 // Create csv file //
   function downloadArticleCsv() {
-    fs.writeFile('articles.csv', articlesCsv, err => {
-      if (err) {
-        console.error("Failed to download articles!")
-      } else {
-        console.log("Articles download successfully!")
-      }
-    })   
+    try {
+      fs.writeFile('HackerNewsArticles.csv', articlesCsv, err => {
+        if (err) {
+          throw new Error("Failed to write articles to file! Aborting...")
+        } else {
+          console.log("Articles successfully written to file! Sending email...")
+        }
+      })
+    } catch(err) {
+      console.error("Failed to write articles to file!")
+    }  
   }
 
   downloadArticleCsv();
@@ -89,15 +97,15 @@ async function saveHackerNewsArticles() {
 // function to send email //
     const message = await transporter.sendMail({
       from: `Kormir <kormir.dev@gmail.com>`,
-      to: 'kormir.dev@gmail.com',
+      to: 'kormir.dev@gmail.com', // change this line to your email address to recieve email & csv attachment.
       subject: 'Hacker News Daily',
       html: html,
       attachments: [{
-        filename: 'articles.csv',
-        path: './articles.csv'
+        filename: 'Hacker New Articles.csv',
+        path: './HackerNewsArticles.csv'
       }]
     });
-    console.log("Article Email sent! " + message.messageId)
+    console.log("Article Email sent! Check your indox. " + message.messageId)
   }
   
   sendArticles()
@@ -108,8 +116,10 @@ async function saveHackerNewsArticles() {
 })();
 
 // Automated scheduleing to recieve emails each day //
+// Currently set to run the entire script at 8am each day. //
+// Edit schedule using https://crontab.guru/#0_8_*_*_* //
 
-// cron.schedule('*/5 * * * *', () => {
+// cron.schedule('0 8 * * *', () => {
 //   (async () => {
 //     await saveHackerNewsArticles();
 //   })();
